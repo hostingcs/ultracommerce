@@ -1,0 +1,18 @@
+{
+  "name": "@ultra/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "worker": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --project tsconfig.json --noEmit",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ultra/core": "workspace:*",
+    "@ultra/db": "workspace:*",
+    "@ultra/modules": "workspace:*"
+  }
+}

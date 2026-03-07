@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../../",
+    "paths": {
+      "@ultra/api-contracts": ["packages/api-contracts/src/index.ts"],
+      "@ultra/core": ["packages/core/src/index.ts"],
+      "@ultra/db": ["packages/db/src/index.ts"],
+      "@ultra/modules": ["packages/modules/src/index.ts"],
+      "@ultra/ui": ["packages/ui/src/index.tsx"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "incremental": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "ultra-commerce",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "build:platform": "pnpm --filter @ultra/platform build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "db:generate": "pnpm --filter @ultra/db db:generate",
+    "db:migrate": "pnpm --filter @ultra/db db:migrate",
+    "db:seed": "pnpm --filter @ultra/db db:seed",
+    "start:platform": "pnpm --filter @ultra/platform start",
+    "start:worker": "pnpm --filter @ultra/worker worker",
+    "worker": "pnpm --filter @ultra/worker worker"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.1.6",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.14",
+    "typescript": "^5.9.3"
+  }
+}

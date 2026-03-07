@@ -1,0 +1,11 @@
+.next
+.turbo
+dist
+build
+coverage
+node_modules
+.env
+.env.*
+!.env.example
+drizzle
+*.tsbuildinfo

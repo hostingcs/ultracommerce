@@ -1,0 +1,22 @@
+{
+  "name": "@ultra/modules",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json --noEmit",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ultra/api-contracts": "workspace:*",
+    "@ultra/core": "workspace:*",
+    "@ultra/db": "workspace:*",
+    "drizzle-orm": "^0.45.1",
+    "resend": "^6.9.3",
+    "zod": "^4.3.6"
+  }
+}
