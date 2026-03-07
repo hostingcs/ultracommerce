@@ -9,8 +9,13 @@ import "./globals.css";
 
 import { ThemeToggle } from "../components/theme-toggle";
 import { ThemeProvider } from "../components/theme-provider";
+import { startPlatformBackgroundRuntime } from "../server/background-runtime";
 
 const seoConfig = getSeoConfig();
+
+if (process.env.NEXT_PHASE !== "phase-production-build") {
+  startPlatformBackgroundRuntime();
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(seoConfig.siteUrl),

@@ -316,13 +316,13 @@ const sampleBlogPosts = [
     id: "blog_002",
     slug: "railway-deployment-basics",
     title: "Railway Deployment Basics",
-    excerpt: "How to ship a stateless Next.js commerce backend with Postgres and workers.",
+    excerpt: "How to ship a stateless Next.js commerce backend with Postgres and a single app service.",
     status: "draft",
     publishedAt: null,
     seo: createSeoMetadata({
       title: "Railway Deployment Basics",
       description:
-        "Deployment guidance for running Ultra Commerce with Railway web, worker, and Postgres services.",
+        "Deployment guidance for running Ultra Commerce with one Railway app service and Postgres.",
       canonicalPath: "/blog/railway-deployment-basics",
       type: "article",
       keywords: ["railway deploy", "nextjs railway", "postgres railway"],
@@ -344,7 +344,7 @@ const plugins: UltraPlugin[] = [
         description: "Injects analytics widgets into the admin dashboard.",
       },
       {
-        key: "worker.job",
+        key: "background.job",
         label: "Background jobs",
         description: "Registers recurring analytics aggregation tasks.",
       },
@@ -456,9 +456,9 @@ export async function getPlatformHealth(): Promise<PlatformHealth> {
         detail: "Admin UI, APIs, and docs are online.",
       },
       {
-        name: "Worker",
+        name: "Background runtime",
         status: "ok",
-        detail: "Queue polling and analytics aggregation are configured.",
+        detail: "Lightweight polling and async coordination run inside the platform service.",
       },
       {
         name: "Postgres",

@@ -69,18 +69,6 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
-  apps/worker:
-    dependencies:
-      '@ultra/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@ultra/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@ultra/modules':
-        specifier: workspace:*
-        version: link:../../packages/modules
-
   packages/api-contracts:
     dependencies:
       zod:
@@ -141,10 +129,10 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       react:
-        specifier: ^19.2.4
+        specifier: ^19.0.0
         version: 19.2.4
       react-dom:
-        specifier: ^19.2.4
+        specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
 
 packages:

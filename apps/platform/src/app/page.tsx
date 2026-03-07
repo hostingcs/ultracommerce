@@ -27,7 +27,7 @@ export default function HomePage() {
             </div>
             <p className="ultra-description">
               The platform is structured as a Next.js admin/API shell backed by isolated
-              commerce modules, shared contracts, a worker runtime, and a reusable UI kit.
+              commerce modules, shared contracts, a baked-in background runtime, and a reusable UI kit.
             </p>
           </Card>
           <StatGrid

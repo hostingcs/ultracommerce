@@ -3,8 +3,7 @@
 Ultra Commerce is a modular, Next.js-based ecommerce backend and admin platform.
 It ships with:
 
-- a Next.js platform app for admin UI, docs, and API routes
-- a worker process for async jobs and integrations
+- a single Next.js platform service for admin UI, docs, API routes, and baked-in background runtime work
 - shared commerce modules for users, catalog, inventory, pricing, carts, orders, payments, shipping, analytics, CMS, notifications, search, settings, and audit
 - a plugin runtime and module registry
 - a reusable compact UI kit and global theme switch
@@ -12,8 +11,7 @@ It ships with:
 
 ## Workspace layout
 
-- `apps/platform`: Next.js admin, docs, and API surface
-- `apps/worker`: async worker process
+- `apps/platform`: Next.js admin, docs, API surface, and in-process background runtime
 - `packages/api-contracts`: shared schemas and OpenAPI metadata
 - `packages/core`: config, plugins, events, permissions, security helpers
 - `packages/db`: Drizzle schema, migrations, seeds, and database client
@@ -29,7 +27,6 @@ It ships with:
 5. Install dependencies with `pnpm install`.
 6. Run `pnpm typecheck`.
 7. Start the platform with `pnpm --filter @ultra/platform dev`.
-8. Start the worker with `pnpm start:worker`.
 
 ## API surfaces
 
@@ -42,7 +39,7 @@ It ships with:
 
 ## Security defaults
 
-- strict CSP, frame, referrer, and content type headers in the platform proxy
+- strict CSP, frame, referrer, and content type headers in platform middleware
 - typed validation contracts and centralized permission primitives
 - idempotency hashing helpers for mutation routes
 - webhook signature verification scaffold
@@ -51,14 +48,13 @@ It ships with:
 
 ## Railway deployment
 
-Railway config files in this repo cover the web service build and start commands. Railway currently does not define a full multi-service project and Postgres service purely from `railway.json`, so deploy Ultra Commerce on Railway with this layout:
+Railway config in this repo is set up for a single application service plus a Postgres database. Deploy Ultra Commerce on Railway with this layout:
 
 1. Create a Railway project from this repository.
-2. Add a `web` service using the root `railway.json`.
-3. Add a second `worker` service from the same repository.
-   Use the start command: `pnpm start:worker`
-4. Add a Railway Postgres service from the Postgres template or database menu.
-5. Set `DATABASE_URL` on both `web` and `worker` to `${{Postgres.DATABASE_URL}}`.
+2. Add one app service using the root `railway.json`.
+3. Add a Railway Postgres service from the Postgres template or database menu.
+4. Set `DATABASE_URL` on the app service to `${{Postgres.DATABASE_URL}}`.
+5. Deploys automatically run `pnpm db:migrate` before the platform starts.
 6. Set `SESSION_SECRET` and `PAYMENT_WEBHOOK_SECRET` as service secrets.
 7. Use separate Railway environments for staging and production.
 
@@ -80,11 +76,12 @@ Suggested service variables:
 - `pnpm db:generate`: generate Drizzle migrations
 - `pnpm db:migrate`: run database migrations
 - `pnpm db:seed`: run the seed bootstrap
-- `pnpm start:worker`: run the worker service
+- `pnpm start:platform`: run the production platform service
+- `pnpm start:platform:deploy`: run migrations, then start the production platform service
 
 ## Notes
 
 - Railway web nodes are stateless, so product media should live in object storage.
-- The current worker is a foundation process and should be extended with job polling, retries, email dispatch, and analytics aggregation.
+- Lightweight background polling can run inside the platform service; heavier async workloads can be split back out later if needed.
 - The current platform provides an enterprise-ready skeleton and typed API foundation; the next iteration should flesh out persistent CRUD flows for each module against Postgres.
 - External service secrets can now be stored in-app in the encrypted settings vault; the master key for encrypting them remains in `APP_ENCRYPTION_KEY`.

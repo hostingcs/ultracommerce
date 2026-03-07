@@ -31,7 +31,7 @@ export default async function DocsPage() {
           <ol className="link-list">
             <li>Configure environment variables and `DATABASE_URL`.</li>
             <li>Run database migrations from `@ultra/db`.</li>
-            <li>Start the Next.js platform and worker services.</li>
+            <li>Start the Next.js platform service.</li>
             <li>Point your storefront frontend to `/api/v1/store/*` endpoints.</li>
           </ol>
         </Card>
@@ -52,7 +52,7 @@ export default async function DocsPage() {
             <h2>Plugin model</h2>
             <p className="ultra-description">
               Plugins can register admin views, store/admin API routes, event subscribers,
-              capability adapters, and worker jobs without reaching across module boundaries.
+              capability adapters, and background jobs without reaching across module boundaries.
             </p>
             <div className="pill-row">
               <Badge>Route hooks</Badge>
