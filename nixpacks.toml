@@ -5,7 +5,7 @@ NIXPACKS_NODE_VERSION = "24"
 nixPkgs = ["nodejs", "pnpm"]
 
 [phases.install]
-cmds = ["corepack enable", "pnpm install --frozen-lockfile"]
+cmds = ["pnpm install --frozen-lockfile"]
 
 [phases.build]
 cmds = ["pnpm build:platform"]
