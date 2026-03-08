@@ -16,7 +16,7 @@
     "start:platform:deploy": "pnpm db:migrate && pnpm start:platform"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "devDependencies": {
     "@types/node": "^25.3.5",
