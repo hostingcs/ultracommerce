@@ -17,7 +17,7 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Commerce",
+    label: "Store",
     items: [
       { href: "/admin", label: "Dashboard", exact: true },
       { href: "/admin/orders", label: "Orders" },
@@ -40,7 +40,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Platform",
     items: [
       { href: "/admin/settings", label: "Settings" },
-      { href: "/api/openapi", label: "OpenAPI", external: true },
+      { href: "/api/openapi", label: "OpenAPI ↗", external: true },
     ],
   },
 ];
@@ -54,24 +54,22 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="admin-sidebar">
-      <div className="admin-sidebar-logo">
-        <span className="admin-sidebar-mark" />
-        <div>
-          <strong>Ultra Commerce</strong>
-          <p>Admin</p>
-        </div>
+    <aside className="sidebar">
+      <div className="sidebar-logo">
+        <div className="sidebar-mark" />
+        <span>Ultra Commerce</span>
       </div>
-      <nav className="admin-sidebar-nav">
+      <nav className="sidebar-nav">
         {NAV_GROUPS.map((group) => (
-          <div key={group.label} className="admin-nav-group">
-            <p className="admin-nav-label">{group.label}</p>
+          <div key={group.label} className="sidebar-group">
+            <p className="sidebar-group-label">{group.label}</p>
             {group.items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 target={item.external ? "_blank" : undefined}
-                className={`admin-nav-item${isActive(item.href, item.exact) ? " admin-nav-item--active" : ""}`}
+                rel={item.external ? "noopener noreferrer" : undefined}
+                className={`sidebar-item${isActive(item.href, item.exact) ? " sidebar-item--active" : ""}`}
               >
                 {item.label}
               </Link>

@@ -1,49 +1,58 @@
-import { getOrders } from "@ultra/modules";
+import { desc } from "drizzle-orm";
 
-function fmt(cents: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+import { getDb, orders } from "@ultra/db";
+
+function fmt(val: string | null) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(parseFloat(val ?? "0"));
 }
 
-function statusClass(status: string) {
-  if (["completed", "delivered"].includes(status)) return "badge badge--success";
-  if (["pending", "processing"].includes(status)) return "badge badge--warning";
-  return "badge badge--neutral";
-}
-
-export default function OrdersPage() {
-  const orders = getOrders();
+export default async function OrdersPage() {
+  const rows = await getDb().select().from(orders).orderBy(desc(orders.createdAt));
 
   return (
-    <div className="admin-page">
-      <div className="admin-page-header">
-        <div>
-          <h1>Orders</h1>
-          <p className="admin-muted">{orders.length} total orders</p>
-        </div>
+    <div className="page">
+      <div className="page-header">
+        <h1>Orders</h1>
+        <span className="page-count">{rows.length} total</span>
       </div>
+
       <div className="panel">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Order #</th>
-              <th>Customer</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Currency</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.number}>
-                <td className="table-mono">{order.number}</td>
-                <td>{order.email}</td>
-                <td><span className={statusClass(order.status)}>{order.status}</span></td>
-                <td>{fmt(order.totalCents)}</td>
-                <td className="admin-muted">{order.currency}</td>
+        {rows.length === 0 ? (
+          <p className="empty">No orders yet.</p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Currency</th>
+                <th>Date</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((o) => (
+                <tr key={o.id}>
+                  <td><a href={`/admin/orders/${o.id}`} className="link font-medium">{o.number}</a></td>
+                  <td>{o.email}</td>
+                  <td>
+                    <span className={`badge ${
+                      o.status === "fulfilled" ? "badge-green" :
+                      o.status === "paid" ? "badge-blue" :
+                      o.status === "pending" ? "badge-yellow" : "badge-red"
+                    }`}>{o.status}</span>
+                  </td>
+                  <td>{fmt(o.total)}</td>
+                  <td className="text-muted">{o.currency}</td>
+                  <td className="text-muted text-sm">{o.createdAt.toLocaleDateString()}</td>
+                  <td><a href={`/admin/orders/${o.id}`} className="btn-ghost-sm">View</a></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

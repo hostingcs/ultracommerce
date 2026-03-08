@@ -13,7 +13,7 @@
     "db:migrate": "pnpm --filter @ultra/db db:migrate",
     "db:seed": "pnpm --filter @ultra/db db:seed",
     "start:platform": "pnpm --filter @ultra/platform start",
-    "start:platform:deploy": "pnpm db:migrate && pnpm start:platform"
+    "start:platform:deploy": "pnpm db:migrate && pnpm db:seed && pnpm start:platform"
   },
   "engines": {
     "node": ">=22"

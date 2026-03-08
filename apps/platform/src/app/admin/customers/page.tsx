@@ -1,51 +1,50 @@
-import { getOrders } from "@ultra/modules";
+import { desc, eq } from "drizzle-orm";
 
-export default function CustomersPage() {
-  const orders = getOrders();
+import { getDb, users } from "@ultra/db";
 
-  const customerMap = new Map<string, { email: string; orders: number; totalCents: number }>();
-  for (const order of orders) {
-    const existing = customerMap.get(order.email);
-    if (existing) {
-      existing.orders += 1;
-      existing.totalCents += order.totalCents;
-    } else {
-      customerMap.set(order.email, { email: order.email, orders: 1, totalCents: order.totalCents });
-    }
-  }
-  const customers = Array.from(customerMap.values()).sort((a, b) => b.totalCents - a.totalCents);
-
-  function fmt(cents: number) {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
-  }
+export default async function CustomersPage() {
+  const rows = await getDb()
+    .select()
+    .from(users)
+    .where(eq(users.role, "customer"))
+    .orderBy(desc(users.createdAt));
 
   return (
-    <div className="admin-page">
-      <div className="admin-page-header">
-        <div>
-          <h1>Customers</h1>
-          <p className="admin-muted">{customers.length} unique customers</p>
-        </div>
+    <div className="page">
+      <div className="page-header">
+        <h1>Customers</h1>
+        <span className="page-count">{rows.length} total</span>
       </div>
+
       <div className="panel">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Orders</th>
-              <th>Total spent</th>
-            </tr>
-          </thead>
-          <tbody>
-            {customers.map((c) => (
-              <tr key={c.email}>
-                <td>{c.email}</td>
-                <td>{c.orders}</td>
-                <td>{fmt(c.totalCents)}</td>
+        {rows.length === 0 ? (
+          <p className="empty">No customers yet.</p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Joined</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((c) => (
+                <tr key={c.id}>
+                  <td className="font-medium">{c.firstName} {c.lastName}</td>
+                  <td>{c.email}</td>
+                  <td>
+                    <span className={`badge ${c.status === "active" ? "badge-green" : c.status === "invited" ? "badge-yellow" : "badge-gray"}`}>
+                      {c.status}
+                    </span>
+                  </td>
+                  <td className="text-muted text-sm">{c.createdAt.toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

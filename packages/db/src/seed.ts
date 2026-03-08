@@ -1,19 +1,52 @@
-import { getPool } from "./client";
+import { promisify } from "node:util";
+import { randomBytes, scrypt } from "node:crypto";
 
-async function run(): Promise<void> {
-  const pool = getPool();
-  const client = await pool.connect();
+import { eq } from "drizzle-orm";
 
-  try {
-    await client.query("select 1");
-    console.log("Ultra Commerce seed bootstrap is ready. Add SQL seeds as needed.");
-  } finally {
-    client.release();
-    await pool.end();
-  }
+import { getDb } from "./client";
+import { users } from "./schema";
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString("hex");
+  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `scrypt:${salt}:${derived.toString("hex")}`;
 }
 
-run().catch((error) => {
-  console.error("Ultra Commerce seed failed.", error);
-  process.exitCode = 1;
-});
+const DEFAULT_EMAIL = "admin@ultra.local";
+const DEFAULT_PASSWORD = "ultra123";
+
+async function run(): Promise<void> {
+  const db = getDb();
+
+  const existing = await db.select().from(users).where(eq(users.email, DEFAULT_EMAIL)).limit(1);
+
+  if (existing.length > 0) {
+    console.log(`Admin user "${DEFAULT_EMAIL}" already exists, skipping seed.`);
+    return;
+  }
+
+  const passwordHash = await hashPassword(DEFAULT_PASSWORD);
+
+  await db.insert(users).values({
+    email: DEFAULT_EMAIL,
+    firstName: "Ultra",
+    lastName: "Admin",
+    role: "admin",
+    status: "active",
+    passwordHash,
+  });
+
+  console.log("✓ Admin user created");
+  console.log(`  Email:    ${DEFAULT_EMAIL}`);
+  console.log(`  Password: ${DEFAULT_PASSWORD}`);
+  console.log("  Change your password after first login.");
+}
+
+run()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error("Seed failed:", error);
+    process.exit(1);
+  });

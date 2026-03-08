@@ -1,98 +1,95 @@
-import { getAnalyticsSnapshot, getAnalyticsControlCenter } from "@ultra/modules";
+import { desc, eq, sql } from "drizzle-orm";
 
-function fmt(cents: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+import { getDb, analyticsSnapshots, orders } from "@ultra/db";
+
+function fmt(val: string | null) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(parseFloat(val ?? "0"));
 }
 
-export default function AnalyticsPage() {
-  const snapshot = getAnalyticsSnapshot();
-  const control = getAnalyticsControlCenter();
+export default async function AnalyticsPage() {
+  const db = getDb();
+
+  const [snapshots, orderStats] = await Promise.all([
+    db.select().from(analyticsSnapshots).orderBy(desc(analyticsSnapshots.createdAt)).limit(10),
+    db.select({
+      total: sql<string>`coalesce(sum(total),0)::text`,
+      count: sql<number>`count(*)::int`,
+      avg: sql<string>`coalesce(avg(total),0)::text`,
+    }).from(orders),
+  ]);
+
+  const latest = snapshots[0];
+  const stats = orderStats[0];
 
   return (
-    <div className="admin-page">
-      <div className="admin-page-header">
-        <div>
-          <h1>Analytics</h1>
-          <p className="admin-muted">Performance snapshot and integration status</p>
-        </div>
+    <div className="page">
+      <div className="page-header">
+        <h1>Analytics</h1>
       </div>
 
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <p className="kpi-label">Revenue</p>
-          <p className="kpi-value">{fmt(snapshot.revenueCents)}</p>
+      <div className="kpi-row">
+        <div className="kpi">
+          <p className="kpi-label">Total revenue</p>
+          <p className="kpi-value">{fmt(stats?.total ?? "0")}</p>
+          <p className="kpi-hint">From orders</p>
         </div>
-        <div className="kpi-card">
+        <div className="kpi">
+          <p className="kpi-label">Total orders</p>
+          <p className="kpi-value">{stats?.count ?? 0}</p>
+        </div>
+        <div className="kpi">
           <p className="kpi-label">Avg order value</p>
-          <p className="kpi-value">{fmt(snapshot.averageOrderValueCents)}</p>
+          <p className="kpi-value">{fmt(stats?.avg ?? "0")}</p>
         </div>
-        <div className="kpi-card">
-          <p className="kpi-label">Conversion rate</p>
-          <p className="kpi-value">{(snapshot.conversionRate * 100).toFixed(1)}%</p>
-        </div>
-        <div className="kpi-card">
-          <p className="kpi-label">Active carts</p>
-          <p className="kpi-value">{snapshot.activeCarts}</p>
-        </div>
+        {latest && (
+          <>
+            <div className="kpi">
+              <p className="kpi-label">Conversion rate</p>
+              <p className="kpi-value">{(Number(latest.conversionRate) * 100).toFixed(1)}%</p>
+              <p className="kpi-hint">Latest snapshot</p>
+            </div>
+            <div className="kpi">
+              <p className="kpi-label">Active carts</p>
+              <p className="kpi-value">{latest.activeCarts}</p>
+              <p className="kpi-hint">Latest snapshot</p>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="dashboard-grid">
+      {snapshots.length > 0 && (
         <div className="panel">
-          <div className="panel-header">
-            <h2>Integrations</h2>
-          </div>
-          <table className="data-table">
+          <div className="panel-header"><h2>Analytics snapshots</h2></div>
+          <table className="table">
             <thead>
               <tr>
-                <th>Provider</th>
-                <th>Status</th>
-                <th>Delivery</th>
-                <th>Capabilities</th>
+                <th>Date</th>
+                <th>Revenue</th>
+                <th>AOV</th>
+                <th>Conversion</th>
+                <th>Active carts</th>
               </tr>
             </thead>
             <tbody>
-              {control.providers.map((p) => (
-                <tr key={p.label}>
-                  <td>{p.label}</td>
-                  <td>
-                    <span className={p.enabled ? "badge badge--success" : "badge badge--neutral"}>
-                      {p.enabled ? "Enabled" : "Disabled"}
-                    </span>
-                  </td>
-                  <td className="admin-muted">{p.delivery}</td>
-                  <td className="admin-muted">{p.capabilities.join(", ")}</td>
+              {snapshots.map((s) => (
+                <tr key={s.id}>
+                  <td className="text-muted text-sm">{s.createdAt.toLocaleString()}</td>
+                  <td>{fmt(s.revenue)}</td>
+                  <td>{fmt(s.averageOrderValue)}</td>
+                  <td>{(Number(s.conversionRate) * 100).toFixed(2)}%</td>
+                  <td>{s.activeCarts}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
 
+      {snapshots.length === 0 && (
         <div className="panel">
-          <div className="panel-header">
-            <h2>Event map</h2>
-          </div>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Event</th>
-                <th>Google Analytics</th>
-                <th>Meta Pixel</th>
-                <th>Meta CAPI</th>
-              </tr>
-            </thead>
-            <tbody>
-              {control.eventDefinitions.map((e) => (
-                <tr key={e.key}>
-                  <td className="table-mono">{e.key}</td>
-                  <td className="admin-muted">{e.providerMappings.google_analytics ?? "—"}</td>
-                  <td className="admin-muted">{e.providerMappings.meta_pixel ?? "—"}</td>
-                  <td className="admin-muted">{e.providerMappings.meta_ads ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <p className="empty">No analytics snapshots recorded yet. Snapshots are written by the background runtime.</p>
         </div>
-      </div>
+      )}
     </div>
   );
 }
