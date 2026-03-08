@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
 
-import Link from "next/link";
-
 import { getSeoConfig } from "@ultra/modules";
 
 import "./globals.css";
 
-import { ThemeToggle } from "../components/theme-toggle";
-import { ThemeProvider } from "../components/theme-provider";
 import { startPlatformBackgroundRuntime } from "../server/background-runtime";
 
 const seoConfig = getSeoConfig();
@@ -64,25 +60,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider>
-          <div className="site-nav">
-            <div>
-              <strong>Ultra Commerce</strong>
-              <p>Modular Next.js commerce platform</p>
-            </div>
-            <nav>
-              <Link href="/">Overview</Link>
-              <Link href="/admin">Admin</Link>
-              <Link href="/docs">Docs</Link>
-              <Link href="/api/openapi">OpenAPI</Link>
-            </nav>
-            <ThemeToggle />
-          </div>
-          {children}
-        </ThemeProvider>
-      </body>
+    <html lang="en">
+      <body>{children}</body>
     </html>
   );
 }
